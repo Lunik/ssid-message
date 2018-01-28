@@ -34,12 +34,12 @@ def loopStellar(args):
 			hostapd.restart()
 
 			lastPrice = prices[currency]
-			time.sleep(interval)
+		time.sleep(interval)
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='Stellar prices SSID')
 	parser.add_argument('--currency', '-c', dest='currency', default='USD', help='Stellar price in selected currency')
-	parser.add_argument('--interval', '-i', dest='interval', default=60, help='Update interval in seconds')
+	parser.add_argument('--interval', '-i', type=float, dest='interval', default=60, help='Update interval in seconds')
 
 	args = parser.parse_args()
 

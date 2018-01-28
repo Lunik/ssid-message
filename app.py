@@ -1,9 +1,12 @@
+#!/usr/bin/python
+
 from src import Wifi, Hostapd, Stellar
 import time
 import signal
+import argparse
 import sys
 
-wifi = Wifi("coucou")
+wifi = Wifi("Stellar Lumens prices")
 hostapd = Hostapd()
 stellar = Stellar()
 
@@ -13,22 +16,31 @@ def sigint_handler(signal, frame):
 
 signal.signal(signal.SIGINT, sigint_handler)
 
-def loopStellar():
+def loopStellar(args):
+	currency = args.currency
+	interval = args.interval
+
 	lastPrice = 0.0
 	while True:
-		prices = stellar.gatherPrice()
+		prices = stellar.gatherPrice(currency)
 
-		if lastPrice != prices['EUR']:
-			print(prices['EUR'])
-			wifi.SSID = 'Stellar Lumens - {} EUR'.format(prices['EUR'])
+		if lastPrice != prices[currency]:
+			print(prices[currency])
+			wifi.SSID = 'Stellar Lumens - {} {}'.format(prices[currency], currency)
 			config = wifi.generateConfig()
 
 			hostapd.publishConfig(config)
 
 			hostapd.restart()
 
-			lastPrice = prices['EUR']
-			time.sleep(1)
+			lastPrice = prices[currency]
+			time.sleep(interval)
 
 if __name__ == "__main__":
-	loopStellar()
+	parser = argparse.ArgumentParser(description='Stellar prices SSID')
+	parser.add_argument('--currency', '-c', dest='currency', default='USD', help='Stellar price in selected currency')
+	parser.add_argument('--interval', '-i', dest='interval', default=60, help='Update interval in seconds')
+
+	args = parser.parse_args()
+
+	loopStellar(args)
